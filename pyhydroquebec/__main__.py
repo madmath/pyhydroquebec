@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timedelta
 from pprint import pprint
 import sys
+import time
 import os
 
 from pyhydroquebec.client import HydroQuebecClient
@@ -84,7 +85,7 @@ def main():
                         default=REQUESTS_TIMEOUT, help='Request timeout')
     parser.add_argument('-L', '--log-level',
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        default='WARNING', help='Log level')
+                        default=os.environ.get('LOGGING') or 'WARNING', help='Log level')
     parser.add_argument('-V', '--version', action='store_true',
                         default=False, help='Show version')
     raw_group = parser.add_argument_group('Detailled-energy raw download option')
@@ -131,48 +132,60 @@ def main():
               "-u/--username, -p/--password")
         return 3
 
-    client = HydroQuebecClient(hydro_user, hydro_pass,
+    while True:
+        client = HydroQuebecClient(hydro_user, hydro_pass,
                                args.timeout, log_level=args.log_level)
-    loop = asyncio.get_event_loop()
 
-    # Get the async_func
-    if args.list_contracts:
-        async_func = list_contracts(client)
-    elif args.dump_data:
-        async_func = dump_data(client, hydro_contract)
-    elif args.detailled_energy is False:
-        async_func = fetch_data(client, hydro_contract, args.hourly)
-    else:
-        start_date = datetime.strptime(args.start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(args.end_date, '%Y-%m-%d')
-        async_func = fetch_data_detailled_energy_use(client, start_date, end_date)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        # Get the async_func
+        if args.list_contracts:
+            async_func = list_contracts(client)
+        elif args.dump_data:
+            async_func = dump_data(client, hydro_contract)
+        elif args.detailled_energy is False:
+            async_func = fetch_data(client, hydro_contract, args.hourly)
+        else:
+            start_date = datetime.strptime(args.start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(args.end_date, '%Y-%m-%d')
+            async_func = fetch_data_detailled_energy_use(client, start_date, end_date)
 
-    # Fetch data
-    try:
-        results = loop.run_until_complete(asyncio.gather(async_func))
-    except BaseException as exp:
-        print(exp)
-        return 1
-    finally:
-        close_fut = asyncio.wait([client.close_session()])
-        loop.run_until_complete(close_fut)
-        loop.close()
+        # Fetch data
+        try:
+            results = loop.run_until_complete(asyncio.gather(async_func))
+        except BaseException as exp:
+            print(exp)
+            return 1
+        finally:
+            close_fut = asyncio.wait([client.close_session()])
+            loop.run_until_complete(close_fut)
+            loop.close()
 
-    # Output data
-    if args.list_contracts:
-        for customer in results[0]:
-            print("Contract: {contract_id}\n\t"
-                  "Account: {account_id}\n\t"
-                  "Customer: {customer_id}".format(**customer))
-    elif args.dump_data:
-        pprint(results[0].__dict__)
-    elif influxdb_host:
-        output_influx(results[0], influxdb_host, influxdb_port,
-                      influxdb_database, influxdb_username, influxdb_password)
-    elif args.json or args.detailled_energy:
-        output_json(results[0])
-    else:
-        output_text(results[0], args.hourly)
+        # Output data
+        if args.list_contracts:
+            for customer in results[0]:
+                print("Contract: {contract_id}\n\t"
+                    "Account: {account_id}\n\t"
+                    "Customer: {customer_id}".format(**customer))
+        elif args.dump_data:
+            pprint(results[0].__dict__)
+        elif influxdb_host:
+            output_influx(results[0], influxdb_host, influxdb_port,
+                        influxdb_database, influxdb_username, influxdb_password)
+        elif args.json or args.detailled_energy:
+            output_json(results[0])
+        else:
+            output_text(results[0], args.hourly)
+
+        i = 0
+        duration = os.environ.get('FREQUENCY_SECONDS')
+        if not duration:
+            break
+        duration = int(duration)
+        client.logger.debug('Sleeping ' + str(duration) + ' seconds until next run.')
+        while i < duration:
+            time.sleep(1)
+            i += 1
     return 0
 
 
