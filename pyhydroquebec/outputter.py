@@ -5,6 +5,8 @@ This module defines the different output functions:
 * influxdb
 * json
 """
+from datetime import datetime, timedelta, timezone
+from influxdb import InfluxDBClient
 
 from pyhydroquebec.consts import (OVERVIEW_TPL,
                                   CONSUMPTION_PROFILE_TPL,
@@ -28,9 +30,28 @@ def output_text(customer, show_hourly=False):
             print(HOURLY_TPL.format(d=data, hour=hour))
 
 
-def output_influx(contract):
+def output_influx(customer, influxdb_host, influxdb_port, influxdb_database,
+                  influxdb_username, influxdb_password):
     """Print data using influxDB format."""
-    raise Exception("FIXME")
+    yesterday_date = list(customer.current_daily_data.keys())[0]
+    yesterday = datetime.strptime(yesterday_date + "--0400", "%Y-%m-%d-%z").astimezone(timezone.utc) 
+    datapoints = []
+    for hour, data in customer.hourly_data[yesterday_date]["hours"].items():
+            time_of_data = yesterday + timedelta(hours=hour)
+            datapoints.append({
+                "measurement": "KWh",
+                "tags": {
+                    "entity_id": "total_consumption",
+                },
+                "time": datetime.strftime(time_of_data, '%Y-%m-%dT%H:%M:%S.%fZ'),
+                "fields": {
+                    "value": float(data['total_consumption'])
+                }
+            })
+
+    client = InfluxDBClient(influxdb_host, influxdb_port, influxdb_username,
+                             influxdb_password, influxdb_database)
+    client.write_points(datapoints)
 #    # Pop yesterdays data
 #    yesterday_data = contract]['yesterday_hourly_consumption']
 #    del data[contract]['yesterday_hourly_consumption']

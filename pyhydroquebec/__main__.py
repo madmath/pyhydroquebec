@@ -77,7 +77,7 @@ def main():
     parser.add_argument('-l', '--list-contracts', action='store_true',
                         default=False, help='List all your contracts')
     parser.add_argument('-H', '--hourly', action='store_true',
-                        default=False, help='Show yesterday hourly consumption')
+                        default=True, help='Show yesterday hourly consumption')
     parser.add_argument('-D', '--dump-data', action='store_true',
                         default=False, help='Show contract python object as dict')
     parser.add_argument('-t', '--timeout',
@@ -110,6 +110,12 @@ def main():
     hydro_user = os.environ.get("PYHQ_USER")
     hydro_pass = os.environ.get("PYHQ_PASSWORD")
     hydro_contract = os.environ.get("PYHQ_CONTRACT")
+
+    influxdb_host = os.environ.get("INFLUXDB_HOST")
+    influxdb_port = os.environ.get("INFLUXDB_PORT")
+    influxdb_database = os.environ.get("INFLUXDB_DATABASE")
+    influxdb_username = os.environ.get("INFLUXDB_USERNAME")
+    influxdb_password = os.environ.get("INFLUXDB_PASSWORD")
 
     # Check Cli
     if args.username:
@@ -160,8 +166,9 @@ def main():
                   "Customer: {customer_id}".format(**customer))
     elif args.dump_data:
         pprint(results[0].__dict__)
-    elif args.influxdb:
-        output_influx(results[0])
+    elif influxdb_host:
+        output_influx(results[0], influxdb_host, influxdb_port,
+                      influxdb_database, influxdb_username, influxdb_password)
     elif args.json or args.detailled_energy:
         output_json(results[0])
     else:
