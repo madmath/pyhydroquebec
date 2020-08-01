@@ -8,3 +8,11 @@ accounts:
   password: PASSWORD
   contracts:
     - id: CONTRACT_ID
+# Required only if PYHQ_OUTPUT=INFLUXDB
+influxdb:
+- host: x.domain
+  port: 8086
+  username: admin
+  password: password
+  database: hq
+

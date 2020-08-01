@@ -29,11 +29,13 @@ Print your current data
 List your current contracts
 
 ::
-config.yaml PYHQ_OUTPUT=MQTT registry.gitlab.com/ttblt-hass/pyhydroquebec:master
+
+    CONFIG=config.yaml PYHQ_OUTPUT=MQTT registry.gitlab.com/ttblt-hass/pyhydroquebec:master
     pyhydroquebec -u MYACCOUNT -p MYPASSWORD -l
 
 
-Print help
+Help
+""""
 
 ::
 
@@ -86,28 +88,31 @@ With Docker
 Docker
 ######
 
-Docker image list: https://gitlab.com/ttblt-hass/pyhydroquebec/container_registry
+- Docker image list: https://gitlab.com/ttblt-hass/pyhydroquebec/container_registry
+- Image is also on Docker Hub (search for pyhydroquebec).
+- It is recommended to map a path to /etc/pyhydroquebec, and use the default config
+  file `pyhydroquebec.yaml` (modeled on config.yaml.sample).
 
 ::
 
     docker run -e PYHQ_USER=*** -e PYHQ_PASSWORD=*** registry.gitlab.com/ttblt-hass/pyhydroquebec:master
 
 Docker variables
-"""""""""
+""""""""""""""""
 
     **PYHQ_USER** - Required
         `-e PYHQ_USER=myusername`
-    
+
     **PYHQ_PASSWORD** - Required
-        `-e PYHQ_PASSWORD=mypassword`    
-    
+        `-e PYHQ_PASSWORD=mypassword`
+
     **PYHQ_OUTPUT**
 
     - `-e PYHQ_OUTPUT=TEXT` - Default
     - `-e PYHQ_OUTPUT=JSON`
     - `-e PYHQ_OUTPUT=INFLUXDB`
     - `-e PYHQ_OUTPUT=CONTRACT`
-        
+
     **PYHQ_CONTRACT**
 
         `-e PYHQ_CONTRACT=332211223`
