@@ -21,7 +21,8 @@ setup(name='pyhydroquebec',
       entry_points={
           'console_scripts': [
               'pyhydroquebec = pyhydroquebec.__main__:main',
-              'mqtt_pyhydroquebec = pyhydroquebec.__main__:mqtt_daemon'
+              'mqtt_pyhydroquebec = pyhydroquebec.__main__:mqtt_daemon',
+              'influxdb_pyhydroquebec = pyhydroquebec.__main__:influxdb_daemon'
           ]
       },
       license='Apache 2.0',

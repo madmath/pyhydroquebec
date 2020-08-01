@@ -11,6 +11,7 @@ import os
 from pyhydroquebec.client import HydroQuebecClient
 from pyhydroquebec.consts import REQUESTS_TIMEOUT, HQ_TIMEZONE
 from pyhydroquebec.outputter import output_text, output_influx, output_json
+from pyhydroquebec.influxdb_daemon import InfluxDBHydroQuebec
 from pyhydroquebec.mqtt_daemon import MqttHydroQuebec
 from pyhydroquebec.__version__ import VERSION
 
@@ -188,12 +189,15 @@ def main():
             i += 1
     return 0
 
-
 def mqtt_daemon():
     """Entrypoint function."""
     dev = MqttHydroQuebec()
     asyncio.run(dev.async_run())
 
+def influxdb_daemon():
+    """Entrypoint function."""
+    dev = InfluxDBHydroQuebec()
+    asyncio.run(dev.async_run())
 
 if __name__ == '__main__':
     sys.exit(main())

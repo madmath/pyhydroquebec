@@ -46,6 +46,10 @@ HOURLY_DATA_URL_1 = ("{}/portail/fr/group/clientele/portrait-de-consommation/"
 HOURLY_DATA_URL_2 = ("{}/portail/fr/group/clientele/portrait-de-consommation/"
                      "resourceObtenirDonneesMeteoHoraires".format(HOST_SPRING))
 
+# InfluxDB measurements.
+COST_MEASUREMENT = 'cost'
+KWH_MEASUREMENT = 'KWh'
+
 CURRENT_MAP = {'period_total_bill': {'raw_name': 'montantFacturePeriode',
                                      'unit': '$',
                                      'icon': 'mdi:currency-usd',

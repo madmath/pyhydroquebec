@@ -44,6 +44,9 @@ fi
 if [ "$PYHQ_OUTPUT" == "MQTT" ]
 then
     mqtt_pyhydroquebec
+elif [ "$PYHQ_OUTPUT" == "INFLUXDB" ]
+then
+    influxdb_pyhydroquebec
 else
     pyhydroquebec -u $PYHQ_USER -p $PYHQ_PASSWORD $PYHQ_CMD_OUTPUT $PYHQ_CMD_CONTRACT
 fi
