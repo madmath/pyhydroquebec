@@ -2,9 +2,9 @@
 set -e
 
 # Check user and password
-if [ -z "$PYHQ_USER" ] || [ -z "$PYHQ_PASSWORD" ]  && [ "$PYHQ_OUTPUT" != "MQTT" ]
+if [ -z "$PYHQ_USER" ] || [ -z "$PYHQ_PASSWORD" ]  && [ "$PYHQ_OUTPUT" != "MQTT" ] && [ "$PYHQ_OUTPUT" != "INFLUXDB" ]
 then
-    echo 'Error: No user or password. Set both environnement variables PYHQ_USER and PYHQ_PASSWORD or PYHQ_OUTPUT=MQTT'
+    echo 'Error: No user or password. Set both environnement variables PYHQ_USER and PYHQ_PASSWORD or either of PYHQ_OUTPUT=MQTT or INFLUXDB'
     exit 1
 fi
 
